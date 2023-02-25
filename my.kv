@@ -1,0 +1,405 @@
+WindowManager:
+    MainWindow:
+        id: main
+    VisualizationWindow:
+        id: visu
+        
+<VisualizationWindow>:
+    name: 'visu'
+    h: h
+    FloatLayout:
+        id: fl_visu
+        canvas.before:
+            Color:
+                rgba: (252/255, 245/255, 225/255, 1)
+            Rectangle:
+                size: self.size
+                pos: self.pos
+             
+        Button:
+            pos_hint:{"x":0.6, "y": 0.35}
+            size_hint:0.05,0.05
+            text: "<-"
+            on_release: 
+                app.root.current = "main"
+                root.manager.transition.direction = "right"
+            background_color: (102/255, 46/255, 31/255, 1)
+        
+        Button:
+            pos_hint:{"x":0.5, "y": 0.35}
+            size_hint:0.05,0.05
+            text: "show"
+            on_release: root.on_press_visu()
+            background_color: (102/255, 46/255, 31/255, 1)
+        
+        GridLayout:
+            id: el_labels
+            cols: 7
+            pos_hint: {'top': 0.9, 'right':0.775}
+            size_hint: 0.7, 0.1
+            BeutyLabel:
+                text: "elem"
+
+            BeutyLabel:
+                text: "x"
+
+            BeutyLabel:
+                text: "y"
+
+            BeutyLabel:
+                text: "z"
+
+            BeutyLabel:
+                text: "wp"
+            BeutyLabel:
+                text: "site"
+            BeutyLabel:
+                text: "occ"                
+        GridLayout:
+            id: el_table
+            cols: 7
+            pos_hint: {'top': 0.8, 'right':0.775}
+            size_hint: 0.7, 0.3
+            
+        Button:
+            pos_hint:{"x":0.075, "y": 0}
+            size_hint:0.85,0.2
+            text: "Restart"
+            on_release: root.press_restart_button()
+            background_color: (102/255, 46/255, 31/255, 1)
+
+        Button:
+            pos_hint:{"x":0.725, "y": 0.45}
+            size_hint:0.05,0.05
+            text: "+"
+            on_release: root.add_element_button()
+            background_color: (102/255, 46/255, 31/255, 1)
+        Button:
+            pos_hint:{"x":0.725, "y": 0.4}
+            size_hint:0.05,0.05
+            text: "-"
+            on_release: root.remove_element_button()
+            background_color: (102/255, 46/255, 31/255, 1)   
+        BeutyLabel2:
+            id: h
+            pos_hint:{"x": 0.4, "top":0.35}
+            size_hint: 0.2, 0.2
+            text: "H ="  
+            
+<BeutyTI@TextInput>:
+    font_size: "17sp"
+    write_tab: False
+    background_color: (252/255, 245/255, 225/255, 1)
+    canvas.before:
+        Color:
+            rgba: (252/255, 245/255, 225/255, 1)
+        Rectangle:
+            size: self.size
+            pos: self.pos      
+        Color:
+            rgba: (245/255, 206/255, 135/255, 1)
+        Line:
+            width: 1.1
+            rectangle: self.x, self.y, self.width, self.height
+        Color:
+            rgba: (102/255, 46/255, 31/255, 1)
+    foreground_color: (102/255, 46/255, 31/255, 1)
+    
+<BeutyLabel@Label>:
+    font_size: "17sp"
+    background_color: (252/255, 245/255, 225/255, 1)
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos      
+        Color:
+            rgba: (245/255, 206/255, 135/255, 1)
+        Line:
+            width: 1.1
+            rectangle: self.x, self.y, self.width, self.height
+    color: (102/255, 46/255, 31/255, 1)
+    bold: True
+
+<BeutyLabel2@Label>:
+    font_size: "17sp"
+    background_color: (252/255, 245/255, 225/255, 1)
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos      
+    color: (102/255, 46/255, 31/255, 1)
+    bold: True
+
+
+<MainWindow>:
+    name: 'main'
+    el_1: el_1
+    x_1: x_1
+    y_1: y_1
+    z_1: z_1
+    occ_1: occ_1
+    el_2: el_2
+    x_2: x_2
+    y_2: y_2
+    z_2: z_2
+    occ_2: occ_2
+    el_3: el_3
+    x_3: x_3
+    y_3: y_3
+    z_3: z_3
+    occ_3: occ_3
+    el_4: el_4
+    x_4: x_4
+    y_4: y_4
+    z_4: z_4
+    occ_4: occ_4
+    h: h
+    a:a
+    b:b
+    c:c
+    alpha: alpha
+    beta: beta
+    gamma: gamma
+    el_table: el_table
+    program_name: program_name
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: (252/255, 245/255, 225/255, 1)
+            Rectangle:
+                size: self.size
+                pos: self.pos      
+
+        GridLayout:
+            cols: 3
+            pos_hint: {'top': 0.9, 'right':0.925}
+            size_hint: 0.3, 0.6
+            BeutyLabel:
+                text: 'a'
+            BeutyLabel:
+                text: 'b'            
+            BeutyLabel:
+                text: 'c'
+                
+            BeutyTI:
+                id: a
+                multiline: False
+                text: "8.7"
+            BeutyTI:
+                id: b
+                multiline: False
+                text: "8.7"             
+            BeutyTI:
+                id: c
+                multiline: False     
+                text: "5"                
+            BeutyLabel:
+                text: 'alpha'
+            BeutyLabel:
+                text: 'beta'            
+            BeutyLabel:
+                text: 'gamma'
+                
+            BeutyTI:
+                id: alpha
+                multiline: False
+                text: "90"             
+            BeutyTI:
+                id: beta
+                multiline: False
+                text: "90"                 
+            BeutyTI:
+                id: gamma
+                multiline: False       
+                text: "90"    
+            BeutyLabel:
+                text: 'space\ngroup'
+                
+            BeutyLabel:
+                text: 'cutoff'
+                
+            BeutyLabel:
+                text: 'compound\ntype'
+                
+            BeutyTI:
+                id: spacegroup
+                multiline: False
+                text: "139"                   
+            BeutyTI:
+                id: cutoff
+                multiline: False   
+                text: "3.61"                  
+            BeutyTI:
+                id: compound_type
+                multiline: False                  
+                text: "2"                  
+        GridLayout:
+            id: el_labels
+            cols: 5
+            pos_hint: {'top': 0.9, 'right':0.575}
+            size_hint: 0.5, 0.1
+            BeutyLabel:
+                text: "elem"
+
+            BeutyLabel:
+                text: "x"
+
+            BeutyLabel:
+                text: "y"
+
+            BeutyLabel:
+                text: "z"
+
+            BeutyLabel:
+                text: "occ"
+
+        GridLayout:
+            id: el_table
+            cols: 5
+            pos_hint: {'top': 0.8, 'right':0.575}
+            size_hint: 0.5, 0.3
+
+            BeutyTI:
+                id: el_1
+                multiline: False
+                text: "Th"
+                
+            BeutyTI:
+                id: x_1
+                multiline: False
+                text: "0.5"
+
+            BeutyTI:
+                id: y_1
+                multiline: False
+                text: "0.5"
+
+            BeutyTI:
+                id: z_1
+                multiline: False
+                text: "0.5"
+
+            BeutyTI:
+                id: occ_1
+                multiline: False         
+                text: "1"
+
+
+            BeutyTI:
+                id: el_2
+                multiline: False
+                text: "Mn"
+
+            BeutyTI:
+                id: x_2
+                multiline: False
+                text: "0.277"
+
+            BeutyTI:
+                id: y_2
+                multiline: False
+                text: "0.5"
+            BeutyTI:
+                id: z_2
+                multiline: False
+                text: "0"
+            BeutyTI:
+                id: occ_2
+                multiline: False
+                text: "1"
+
+
+            BeutyTI:
+                id: el_3
+                multiline: False
+                text: "Mn"
+
+            BeutyTI:
+                id: x_3
+                multiline: False
+                text: "0.361"
+
+            BeutyTI:
+                id: y_3
+                multiline: False
+                text: "0"
+
+            BeutyTI:
+                id: z_3
+                multiline: False
+                text: "0"
+
+            BeutyTI:
+                id: occ_3
+                multiline: False 
+                text: "1"
+
+            BeutyTI:
+                id: el_4
+                multiline: False
+                text: "Mn"
+
+            BeutyTI:
+                id: x_4
+                multiline: False
+                text: "0.25"
+
+            BeutyTI:
+                id: y_4
+                multiline: False
+                text: "0.25"
+
+            BeutyTI:
+                id: z_4
+                multiline: False
+                text: "0.25"
+
+            BeutyTI:
+                id: occ_4
+                multiline: False 
+                text: "1"
+        BeutyLabel2:
+            id: h
+            pos_hint:{"x": 0.4, "top":0.35}
+            size_hint: 0.2, 0.2
+            text: "H ="  
+
+        Button:
+            pos_hint:{"x":0.075, "y": 0}
+            size_hint:0.85,0.2
+            text: "Start"
+            on_release: root.press_button()
+            background_color: (102/255, 46/255, 31/255, 1)
+
+        Button:
+            pos_hint:{"x":0.525, "y": 0.45}
+            size_hint:0.05,0.05
+            text: "+"
+            on_release: root.add_element_button()
+            background_color: (102/255, 46/255, 31/255, 1)
+        Button:
+            pos_hint:{"x":0.525, "y": 0.4}
+            size_hint:0.05,0.05
+            text: "-"
+            on_release: root.remove_element_button()
+            background_color: (102/255, 46/255, 31/255, 1)
+        Button:
+            pos_hint:{"x":0.525, "y": 0.35}
+            size_hint:0.05,0.05
+            text: "->"
+            on_release: 
+                app.root.current = "visu"
+                root.manager.transition.direction = "left"
+            background_color: (102/255, 46/255, 31/255, 1)
+        BeutyLabel2:
+            id: program_name
+            pos_hint:{"top":1}
+            size_hint: 1, 0.1
+            font_size: root.width/20
+            text: "Miedema program"
+            italic: True
+            bold: True

@@ -1,0 +1,74 @@
+import pandas as pd
+#нужно запихать эту прогу как функцию в которую даются данные типа двух элементов и атомных долей но второе хз как
+df=pd.read_excel('table.xlsx')
+
+print('Ввести элементы соединения')
+A=input()
+B=input()
+#A-первый элемент в сочетании двух элементов, B - второй элемент
+
+print('Ввести атомные доли')
+CA=float(input())
+CB=float(input())
+#дю сказал что это берется из начальных условий но я не очень понимаю как найти их в соединении из трех элементов...
+
+a=df.index[df.element == A]
+b=df.index[df.element == B]
+for i in a:
+   a=i
+for i in b:
+   b=i
+
+#найдем значения фи
+fiA=df.at[a,'electronegativity']
+fiB=df.at[b,'electronegativity']
+delfi=fiA-fiB
+
+#n
+nA=df.at[a,'discontinuity']
+nB=df.at[b,'discontinuity']
+deln=nA-nB
+
+#V
+VA=df.at[a,'volume']
+VB=df.at[b,'volume']
+
+#поверхностные концентрации
+CAS=round(CA*VA/(CA*VA+CB*VB),3)
+CBS=round(CB*VB/(CA*VA+CB*VB),3)
+
+#коэффициент f
+print('Выбрать тип соединения:1-неупорядоченный тв р-р,2-упорядоченное соединение,3-аморфные фазы')
+tip=input()
+f=0
+#это по идее надо сделать в основной части проги потому что значение постоянно для всех сочетаний
+if tip==1:
+   f=CAS*CBS
+elif tip==2:
+   f=CAS*CBS*(1+5*(CAS*CBS)*(CAS*CBS))
+else:
+   f=CAS*CBS*(1+8*(CAS*CBS)*(CAS*CBS))
+
+
+#константы
+P1=df.at[a,'переходность']
+P2=df.at[b,'переходность']
+P=0
+if (P1=='ПМ' and P2=='ПМ'):
+   P=14.1
+elif (P1=='ПМ' and P2=='НПМ'):
+   P=12.3
+else:
+   P=10.6
+
+QP=9.4
+RP=0
+
+
+#энтальпия
+H=2*f*(CA*VA+CB*VB)/(1/nA+1/nB)*(-P*delfi*delfi+QP*P*deln*deln)
+
+#фактор вигнера-зейтца
+Sc=1-CBS*(VA-VB)/(CAS*VA+CBS*VB)
+H=H*Sc
+print(H)
