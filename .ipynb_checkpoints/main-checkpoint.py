@@ -1,7 +1,5 @@
-from Enthalpy_calculation import H_miedema
-
 # import numpy as np, pandas as pd
-from Enthalpy_calculation import H_miedema
+from Enthalpy_calculation import H_miedema, Morse_potential, L_J_potential, calculate_enthalpy
 import copy
 import numpy as np, pandas as pd
 
@@ -23,7 +21,7 @@ from ase.spacegroup import crystal
 from pyxtal.viz import display_crystals
 # import pandas as pd
 from ase.spacegroup import Spacegroup
-from Enthalpy_calculation import H
+from Enthalpy_calculation import convert_to_float
 from pyxtal.symmetry import Group
 from pyxtal.molecule import pyxtal_molecule
 from pymatgen.core import Molecule
@@ -61,11 +59,10 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 
-# total = 0
-# for A, B, d, cnt in neigh_df.values:
-#     total += H(A, B, 1, 1, 1, 'miedema_coefficients.xlsx', 0, 0, 1, 1, d, cnt)
+
+
 class VisualizationWindow(Screen):
-    # pass
+
 
     need_add = 1
     def __init__(self, **kwargs):
@@ -77,9 +74,7 @@ class VisualizationWindow(Screen):
             Clock.schedule_once(self.plot_graph)
         else:
             self.plot_graph()
-            
-        # box = self.ids.fl_visu
-        # box.add_widget(FigureCanvasKivyAgg(plt.gcf()))        
+                    
     def plot_graph(self):
         box = self.ids.fl_visu
         if self.need_add == 1:
@@ -90,11 +85,10 @@ class VisualizationWindow(Screen):
         elif self.need_add == 0:
             box.remove_widget(self.ids.plot_visu)
             self.need_add = 1
-            #сделать один суперкласс и от него отнаследовать методы для таблицы
+            
     def add_element_button(self):
-        #add element row
+
         self.ids.n += 1
-        print(self.ids)
         el = BeutyTI()
         x = BeutyTI(text="-")
         y = BeutyTI(text="-")
@@ -120,44 +114,27 @@ class VisualizationWindow(Screen):
         self.ids.el_table.add_widget(occ)
 
     def remove_element_button(self):
-    #add element row
         if self.ids.n != 0:
             for label in ['el', 'x', 'y', 'z', 'wp', 'sym', 'occ']:
                 exec(f'self.ids.el_table.remove_widget(self.ids.el_table.ids.{label}_{self.ids.n})')
 
             self.ids.n -= 1
-            print(self.ids.n)
-            
-            print(self.manager.ids.main.ids)
             
             
     def press_restart_button(self):       
-        # считать строчки новые
-        # добавить элементы и оккупации в новые позиции скопированного массива
-        # отнормализовать оккупации
-        # пересчитать энтальпию
-        # надо считать со строки под номером main ids n по self ids n 
-        # скопировать dist df из main window
         self.ids.extended_grouped_dist_arr = copy.deepcopy(self.manager.ids.main.ids.grouped_dist_arr)
-        # self.id.dist_arr = np.array([[[A], A_site, [B], B_site, Distance, [occ_A], [occ_B], cnt] for (A, A_site, B, B_site, Distance, occ_A, occ_B, cnt) in grouped_dist_arr])
         
-        print(self.ids.extended_grouped_dist_arr)
-        print('visu: \n', self.ids.n)
-        print('main: \n', self.manager.ids.main.ids.n)
-        print('df : \n', self.ids.extended_grouped_dist_arr)
+        type_compound = int(self.manager.ids.main.ids.compound_type.text)
+        num_atoms = int(self.manager.ids.main.ids.num_atoms)
         el_list = []
         for i in range(1, self.ids.n + 1):
             exec(f'el_list.append([self.ids.el_table.ids.el_{i}.text, self.ids.el_table.ids.wp_{i}.text, float(self.ids.el_table.ids.occ_{i}.text)])')
-        print(el_list)
+            
         for el, wp, occ in el_list:
             #проверка, что occ для существуещего элемента
             cond1 = ((self.ids.extended_grouped_dist_arr[:, 1] == wp) & (self.ids.extended_grouped_dist_arr[:, 0] == el)).any().any()
             
             cond2 = ((self.ids.extended_grouped_dist_arr[:, 3] == wp) & (self.ids.extended_grouped_dist_arr[:, 2] == el)).any().any()
-            
-            print('cond1: ', cond1)
-            
-            print('cond2: ', cond2)
             
             if cond1 or cond2:
                 for i,_ in enumerate(self.ids.extended_grouped_dist_arr):
@@ -174,7 +151,6 @@ class VisualizationWindow(Screen):
             cond1 = ((self.ids.extended_grouped_dist_arr[:, 1] == wp) & (self.ids.extended_grouped_dist_arr[:, 0] == el)).any().any()
             
             cond2 = ((self.ids.extended_grouped_dist_arr[:, 3] == wp) & (self.ids.extended_grouped_dist_arr[:, 2] == el)).any().any()
-            
             if not (cond1 or cond2):
                 for row in dist_arr[(self.ids.extended_grouped_dist_arr[:, 1] == wp)]:
                     row[0].append(el)
@@ -184,25 +160,19 @@ class VisualizationWindow(Screen):
                     row[2].append(el)
                     row[6].append(occ)
                 
-        for i, row in enumerate(dist_arr):
-            norm_sum = sum(dist_arr[i][6])
-            dist_arr[i][6] = [occ_/norm_sum for occ_ in dist_arr[i][6]]
-            print(dist_arr[i][6])
-            norm_sum = sum(dist_arr[i][5])
-            dist_arr[i][5] = [occ_/norm_sum for occ_ in dist_arr[i][5]]
+        # for i, row in enumerate(dist_arr):
+        #     norm_sum = sum(dist_arr[i][6])
+        #     dist_arr[i][6] = [occ_/norm_sum for occ_ in dist_arr[i][6]]
+        #     norm_sum = sum(dist_arr[i][5])
+        #     dist_arr[i][5] = [occ_/norm_sum for occ_ in dist_arr[i][5]]
             
-            
-        
-        
-        print(dist_arr) 
+        print('transformed crystal: \n', dist_arr)
         
         self.total = 0
-        for A_ar, _, B_ar, _, dist, occ_A_ar, occ_B_ar, cnt in dist_arr:
-            for i, A in enumerate(A_ar):
-                for j, B in enumerate(B_ar):
-                    self.total += H(A, B, 1, 1, 1, 'miedema_coefficients.xlsx', 0, 0, occ_A_ar[i], occ_B_ar[j], dist, cnt)
-
-        print('H= ', self.total)
+        calculate_enthalpy(dist_arr, n_jobs=1)
+        self.total /= num_atoms          
+        print('NUM ions = ', num_atoms)
+        print('Total Energy = ', self.total)
         self.h.text = f'H = {self.total}'
 # calculate H by dist_arr
 
@@ -217,11 +187,9 @@ class MainWindow(Screen):
     def __init__(self, n=4, **kwargs):
         super(MainWindow, self).__init__(**kwargs)
         self.ids.n = n
+        self.ids.num_atoms = 1
         self.ids.grouped_dist_arr = np.array([])
-    # self.manager.ids.visu.ids.n = len(crystal_pyxtal.atom_sites) 
     i = 0
-    #подсвечивать и выделять пустые значения
-    # объединить каждую строку в виджет который будет являться лэяутом и добавлять их динамически
     def press_button(self):
         #return enthalpy
 
@@ -229,11 +197,13 @@ class MainWindow(Screen):
         columns_el = ['el', 'x', 'y', 'z', 'occ']
         columns_crystal = ['a', 'b', 'c', 
                            'alpha', 'beta', 'gamma', 
-                           'spacegroup', 'cutoff', 'compound_type']
+                           'spacegroup', 'compound_type']
         el_list = []
         for i in range(1, self.ids.n + 1):
             exec(f'el_list.append([self.ids.el_{i}.text, self.ids.x_{i}.text, self.ids.y_{i}.text, self.ids.z_{i}.text, self.ids.occ_{i}.text])')
         
+        
+        print(f'el_list: \n {el_list}')
         crystal_list = [[self.ids.a.text,
          self.ids.b.text,
          self.ids.c.text, 
@@ -241,16 +211,21 @@ class MainWindow(Screen):
          self.ids.beta.text,
          self.ids.gamma.text,
          self.ids.spacegroup.text,
-         self.ids.cutoff.text,
          self.ids.compound_type.text]]
-
+        
+        print(f'crystal_list: \n {crystal_list}')
+        
         self.crystal_info = pd.DataFrame(crystal_list, 
                                          columns=columns_crystal).replace(r'^\s*$', np.nan,                                               regex=True).dropna().astype('float64').astype({'compound_type': 'int64', 'spacegroup': 'int64'}) 
-        self.element_info = pd.DataFrame(el_list, columns=columns_el).replace(r'^\s*$', np.nan,                                                    regex=True).dropna().astype({'el': str, 
-                                                                              'x': 'float64',
-                                                                              'y': 'float64',
-                                                                              'z': 'float64',
-                                                                              'occ': 'float64'}) 
+        
+        
+        
+        self.element_info = pd.DataFrame(el_list, columns=columns_el).replace(r'^\s*$', np.nan,                                                    regex=True).dropna().astype({'el': str, }) 
+        
+        self.element_info[['x', 'y', 'z', 'occ']] = self.element_info[['x', 'y', 'z', 'occ']].applymap(lambda x: convert_to_float(x))
+    
+        
+        type_compound = int(self.ids.compound_type.text)
         
         self.params = {'spacegroup': int(self.crystal_info.loc[:, 'spacegroup'].values[0]),
                   'basis': [tuple(x) for x in 
@@ -270,12 +245,14 @@ class MainWindow(Screen):
 
         
         compound_type = self.crystal_info.loc[:, 'compound_type'].values[0]
-        
+        print(f'self.params: \n{self.params}')
         crystal_ase = crystal(**self.params, pbc=True)
-        print(crystal_ase)
+        print(f'crystal_ase: \n{crystal_ase}')
         crystal_pyxtal = pyxtal()
 
         crystal_pyxtal.from_seed(crystal_ase)
+        print(f'crystal_pyxtal: \n{crystal_pyxtal}')
+        self.ids.num_atoms = crystal_ase.get_global_number_of_atoms()
         
         sites = []
         
@@ -285,7 +262,17 @@ class MainWindow(Screen):
                 
         ordered_site = [sites[i] for i in crystal_ase.arrays['spacegroup_kinds']]
         
-        cutoff = ((crystal_ase.get_volume())**(1/3))/2
+        if self.ids.cutoff.text == '-1':
+            cutoff = ((crystal_ase.get_volume())**(1/3))/2
+            print('CUTOFF: ', cutoff)
+        else:
+            cutoff = float(self.ids.cutoff.text)
+        
+        uniq_elem = list(crystal_pyxtal.get_site_labels().keys())
+
+        num_Ions = crystal_pyxtal.numIons
+
+        el_to_c = dict(zip(uniq_elem, num_Ions/sum(num_Ions)))
         
         neigh_list = neighbor_list('ijd', crystal_ase, cutoff)
         
@@ -300,67 +287,74 @@ class MainWindow(Screen):
         for n in range(len(i_decoded)): #сюда добавить окупации
             dist.append([*i_decoded[n], *j_decoded[n]] + [round(d[n], 3), 1, 1])
         
+        try:
         
-        
-        grouped_dist_df = pd.DataFrame(dist, columns=['A', 'A_site', 'B', 'B_site', 'Distance', 'occ_A', 'occ_B']).groupby(['A', 'A_site', 'B', 'B_site', 'Distance', 'occ_A', 'occ_B'])['Distance'].count().to_frame('cnt').reset_index()
-        
-        self.ids.grouped_dist_arr = grouped_dist_df.values
-        
+            grouped_dist_df = pd.DataFrame(dist, columns=['A', 'A_site', 'B', 'B_site', 'Distance', 'occ_A', 'occ_B']).groupby(['A', 'A_site', 'B', 'B_site', 'Distance', 'occ_A', 'occ_B'])['Distance'].count().to_frame('cnt').reset_index()
 
-        
-        write('image.png', crystal_ase)
-        img = mpimg.imread('image.png')
-        plt.imshow(img)
-        print(self.ids.grouped_dist_arr)
-        # Что делать с атомами в одинаковых позициях но где != 0 по миедеме
-        # я хочу составить табличку попарных расстояний между парами частица-пст = частица-пст
-        # после этого я смогу добавить occ, и множить базовые строки, добавляя эффективно атом
-        #здесь я уже могу загнать энтальпию в формулу
-        # добавить эту инфо на вторую стр и дать возможность добавлять в позиции атомы. добавляя или уменьшая dist df   
-        #тут надо пересоздавать grid layout
-        self.manager.ids.visu.ids.el_table.clear_widgets()
-        output = []
-        #здесь просто вызвать метод класс окна визуализаций
-        for num, s in enumerate(crystal_pyxtal.atom_sites):
-            spl = str(s).split()
-            el = BeutyTI(text=spl[0])
-            x = BeutyTI(text=spl[3])
-            y = BeutyTI(text=spl[4])
-            z = BeutyTI(text=spl[5][:-2:])
-            wp = BeutyTI(text=spl[7][1:-1:])
-            sym = BeutyTI(text=spl[9][1:-1:])
-            occ = BeutyTI(text="1")
-            
-            self.manager.ids.visu.ids.el_table.ids[f'el_{num+1}'] = weakref.ref(el)
-            self.manager.ids.visu.ids.el_table.ids[f'x_{num+1}'] = weakref.ref(x)
-            self.manager.ids.visu.ids.el_table.ids[f'y_{num+1}'] = weakref.ref(y)
-            self.manager.ids.visu.ids.el_table.ids[f'z_{num+1}'] = weakref.ref(z)
-            self.manager.ids.visu.ids.el_table.ids[f'wp_{num+1}'] = weakref.ref(wp)
-            self.manager.ids.visu.ids.el_table.ids[f'sym_{num+1}'] = weakref.ref(sym)
-            self.manager.ids.visu.ids.el_table.ids[f'occ_{num+1}'] = weakref.ref(occ)
-            
-            self.manager.ids.visu.ids.el_table.add_widget(el)
-            self.manager.ids.visu.ids.el_table.add_widget(x)
-            self.manager.ids.visu.ids.el_table.add_widget(y)
-            self.manager.ids.visu.ids.el_table.add_widget(z)
-            self.manager.ids.visu.ids.el_table.add_widget(wp)
-            self.manager.ids.visu.ids.el_table.add_widget(sym)
-            self.manager.ids.visu.ids.el_table.add_widget(occ)
-            
-        self.manager.ids.visu.ids.n = len(crystal_pyxtal.atom_sites)    
-       
-        print(self.element_info, self.crystal_info)
-        
-        dist_arr = np.array([[[A], A_site, [B], B_site, Distance, [occ_A], [occ_B], cnt] for (A, A_site, B, B_site, Distance, occ_A, occ_B, cnt) in self.ids.grouped_dist_arr])
-        
-        self.total = 0
-        for A_ar, _, B_ar, _, dist, occ_A_ar, occ_B_ar, cnt in dist_arr:
-            for i, A in enumerate(A_ar):
-                for j, B in enumerate(B_ar):
-                    self.total += H(A, B, 1, 1, 1, 'miedema_coefficients.xlsx', 0, 0, occ_A_ar[i], occ_B_ar[j], dist, cnt)
+            print('dist', grouped_dist_df)
+            grouped_dist_df['dupl_set'] = grouped_dist_df.apply(lambda x: frozenset([x['A'], 
+                                                                               x['A_site'], 
+                                                                               x['B'],
+                                                                               x['B_site'], 
+                                                                               x['Distance']]), 
+                                                                axis=1)
 
-        print('H= ', self.total)
-        self.h.text = f'H = {self.total}'
+            grouped_dist_df = grouped_dist_df.drop_duplicates(subset='dupl_set')
+
+            grouped_dist_df = grouped_dist_df.drop(columns='dupl_set')
+
+            self.ids.grouped_dist_arr = grouped_dist_df.values        
+
+            write('image.png', crystal_ase)
+            img = mpimg.imread('image.png')
+            plt.imshow(img)
+            print('initial crystal: \n', grouped_dist_df)
+            self.manager.ids.visu.ids.el_table.clear_widgets()
+            output = []
+            #здесь просто вызвать метод класс окна визуализаций
+            for num, s in enumerate(crystal_pyxtal.atom_sites):
+                spl = str(s).split()
+                el = BeutyTI(text=spl[0])
+                x = BeutyTI(text=spl[3])
+                y = BeutyTI(text=spl[4])
+                z = BeutyTI(text=spl[5][:-2:])
+                wp = BeutyTI(text=spl[7][1:-1:])
+                sym = BeutyTI(text=spl[9][1:-1:])
+                occ = BeutyTI(text="1")
+
+                self.manager.ids.visu.ids.el_table.ids[f'el_{num+1}'] = weakref.ref(el)
+                self.manager.ids.visu.ids.el_table.ids[f'x_{num+1}'] = weakref.ref(x)
+                self.manager.ids.visu.ids.el_table.ids[f'y_{num+1}'] = weakref.ref(y)
+                self.manager.ids.visu.ids.el_table.ids[f'z_{num+1}'] = weakref.ref(z)
+                self.manager.ids.visu.ids.el_table.ids[f'wp_{num+1}'] = weakref.ref(wp)
+                self.manager.ids.visu.ids.el_table.ids[f'sym_{num+1}'] = weakref.ref(sym)
+                self.manager.ids.visu.ids.el_table.ids[f'occ_{num+1}'] = weakref.ref(occ)
+
+                self.manager.ids.visu.ids.el_table.add_widget(el)
+                self.manager.ids.visu.ids.el_table.add_widget(x)
+                self.manager.ids.visu.ids.el_table.add_widget(y)
+                self.manager.ids.visu.ids.el_table.add_widget(z)
+                self.manager.ids.visu.ids.el_table.add_widget(wp)
+                self.manager.ids.visu.ids.el_table.add_widget(sym)
+                self.manager.ids.visu.ids.el_table.add_widget(occ)
+
+            self.manager.ids.visu.ids.n = len(crystal_pyxtal.atom_sites)    
+
+
+            dist_arr = np.array([[[A], A_site, [B], B_site, Distance, [occ_A], [occ_B], cnt] for (A, A_site, B, B_site, Distance, occ_A, occ_B, cnt) in self.ids.grouped_dist_arr])
+
+            self.total = 0
+
+            calculate_enthalpy(dist_arr, n_jobs=1)
+
+            self.total /= self.ids.num_atoms          
+
+            print('Total Energy = ', self.total)
+            print('NUM ions = ', self.ids.num_atoms)
+            self.h.text = f'H = {self.total}'
+        except BaseException as e:
+            print(e)
+            self.h.text = f'H = error! please, try to change cutoff or structure'
             
     def add_element_button(self):
         #add element row
