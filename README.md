@@ -35,6 +35,14 @@ uv pip install -e .
 
 ## Run
 
+Quick start (auto setup if needed):
+
+```bash
+./start.sh
+```
+
+Or manually:
+
 ```bash
 source .venv/bin/activate
 python run.py
@@ -49,5 +57,17 @@ All dependencies are managed via `pyproject.toml` using `uv`. The project uses P
 The application provides a graphical interface for:
 
 - Defining crystal structures
-- Calculating formation enthalpies
+- Calculating formation enthalpies using Miedema model
 - Visualizing results
+
+### Cutoff Parameter
+
+- Use `-1` for automatic cutoff calculation (recommended)
+- Automatic: `cutoff = min(a, b, c) × 0.8`
+- Manual: specify custom value (e.g., `2.0`, `3.5`)
+
+## Known Issues
+
+**Matplotlib visualization**: Garden matplotlib has compatibility issues with newer matplotlib versions. Interactive features (zoom, pan) are disabled but static visualization works. See `docs/FIXES.md` for details.
+
+Other known issues and solutions are documented in `docs/FIXES.md`.

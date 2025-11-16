@@ -14,7 +14,6 @@ from kivy.uix.screenmanager import Screen
 from pyxtal import pyxtal
 
 from miedema.core.calculations import calculate_enthalpy
-from miedema.ui.widgets import BeutyTI
 from miedema.utils.helpers import convert_to_float
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
@@ -39,23 +38,31 @@ class VisualizationWindow(Screen):
     def plot_graph(self):
         box = self.ids.fl_visu
         if self.need_add == 1:
-            pic = FigureCanvasKivyAgg(plt.gcf())
-            self.ids["plot_visu"] = weakref.ref(pic)
-            box.add_widget(pic)
-            self.need_add = 0
+            try:
+                pic = FigureCanvasKivyAgg(plt.gcf())
+                self.ids["plot_visu"] = weakref.ref(pic)
+                box.add_widget(pic)
+                self.need_add = 0
+            except Exception as e:
+                print(f"Error adding plot: {e}")
         elif self.need_add == 0:
-            box.remove_widget(self.ids.plot_visu)
-            self.need_add = 1
+            try:
+                box.remove_widget(self.ids.plot_visu)
+                self.need_add = 1
+            except Exception as e:
+                print(f"Error removing plot: {e}")
 
     def add_element_button(self):
+        from kivy.factory import Factory
+
         self.ids.n += 1
-        el = BeutyTI()
-        x = BeutyTI(text="-")
-        y = BeutyTI(text="-")
-        z = BeutyTI(text="-")
-        wp = BeutyTI()
-        sym = BeutyTI(text="-")
-        occ = BeutyTI(text="1")
+        el = Factory.BeutyTI()
+        x = Factory.BeutyTI(text="-")
+        y = Factory.BeutyTI(text="-")
+        z = Factory.BeutyTI(text="-")
+        wp = Factory.BeutyTI()
+        sym = Factory.BeutyTI(text="-")
+        occ = Factory.BeutyTI(text="1")
 
         self.ids.el_table.ids[f"el_{self.ids.n}"] = weakref.ref(el)
         self.ids.el_table.ids[f"x_{self.ids.n}"] = weakref.ref(x)
@@ -140,7 +147,8 @@ class VisualizationWindow(Screen):
                     occ_B,
                     cnt,
                 ) in self.ids.extended_grouped_dist_arr
-            ]
+            ],
+            dtype=object,
         )
 
         for el, wp, occ in el_list:
@@ -242,7 +250,7 @@ class MainWindow(Screen):
 
         self.element_info[["x", "y", "z", "occ"]] = self.element_info[
             ["x", "y", "z", "occ"]
-        ].applymap(lambda x: convert_to_float(x))
+        ].map(lambda x: convert_to_float(x))
 
         type_compound = int(self.ids.compound_type.text)
 
@@ -277,8 +285,9 @@ class MainWindow(Screen):
         ordered_site = [sites[i] for i in crystal_ase.arrays["spacegroup_kinds"]]
 
         if self.ids.cutoff.text == "-1":
-            cutoff = ((crystal_ase.get_volume()) ** (1 / 3)) / 2
-            print("CUTOFF: ", cutoff)
+            cell_params = crystal_ase.get_cell_lengths_and_angles()[:3]
+            cutoff = min(cell_params) * 0.8
+            print("AUTO CUTOFF: ", cutoff, "from cell params:", cell_params)
         else:
             cutoff = float(self.ids.cutoff.text)
 
@@ -346,14 +355,16 @@ class MainWindow(Screen):
             self.manager.ids.visu.ids.el_table.clear_widgets()
             output = []
             for num, s in enumerate(crystal_pyxtal.atom_sites):
+                from kivy.factory import Factory
+
                 spl = str(s).split()
-                el = BeutyTI(text=spl[0])
-                x = BeutyTI(text=spl[3])
-                y = BeutyTI(text=spl[4])
-                z = BeutyTI(text=spl[5][:-2:])
-                wp = BeutyTI(text=spl[7][1:-1:])
-                sym = BeutyTI(text=spl[9][1:-1:])
-                occ = BeutyTI(text="1")
+                el = Factory.BeutyTI(text=spl[0])
+                x = Factory.BeutyTI(text=spl[3])
+                y = Factory.BeutyTI(text=spl[4])
+                z = Factory.BeutyTI(text=spl[5][:-2:])
+                wp = Factory.BeutyTI(text=spl[7][1:-1:])
+                sym = Factory.BeutyTI(text=spl[9][1:-1:])
+                occ = Factory.BeutyTI(text="1")
 
                 self.manager.ids.visu.ids.el_table.ids[f"el_{num + 1}"] = weakref.ref(
                     el
@@ -394,7 +405,8 @@ class MainWindow(Screen):
                         occ_B,
                         cnt,
                     ) in self.ids.grouped_dist_arr
-                ]
+                ],
+                dtype=object,
             )
 
             calculate_enthalpy(dist_arr, n_jobs=1)
@@ -404,12 +416,14 @@ class MainWindow(Screen):
             self.h.text = f"error! please, try to change cutoff or structure"
 
     def add_element_button(self):
+        from kivy.factory import Factory
+
         self.ids.n += 1
-        el_i = BeutyTI()
-        x_i = BeutyTI()
-        y_i = BeutyTI()
-        z_i = BeutyTI()
-        occ_i = BeutyTI(text="1")
+        el_i = Factory.BeutyTI()
+        x_i = Factory.BeutyTI()
+        y_i = Factory.BeutyTI()
+        z_i = Factory.BeutyTI()
+        occ_i = Factory.BeutyTI(text="1")
 
         self.ids[f"el_{self.ids.n}"] = weakref.ref(el_i)
         self.ids[f"x_{self.ids.n}"] = weakref.ref(x_i)
